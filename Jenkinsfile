@@ -27,7 +27,7 @@ pipeline {
             }
             steps {
                 sh 'printenv'
-                sh "terraform apply -auto-approve -input=false -var=\"access_key=${env.AWS_ACCESS_KEY_USR}\" -var=\"secret_key=${env.AWS_ACCESS_KEY_PSW}\" ThePlan"
+                sh "terraform apply -auto-approve -input=false ThePlan"
             }
         }
     }
