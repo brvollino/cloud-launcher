@@ -14,7 +14,7 @@ pipeline {
                 AWS_ACCESS_KEY = credentials('aws-access-credential')
             }
             steps {
-                sh 'terraform plan -var="access_key=${env.AWS_ACCESS_KEY_USR}" -var="secret_key=${env.AWS_ACCESS_KEY_PSW}"'
+                sh 'terraform plan -var=\"access_key=${env.AWS_ACCESS_KEY_USR}\" -var=\"secret_key=${env.AWS_ACCESS_KEY_PSW}\"'
             }
         }
         stage('Terraform apply') {
@@ -26,7 +26,7 @@ pipeline {
             }
             steps {
                 sh 'printenv'
-                sh 'terraform apply -var="access_key=${env.AWS_ACCESS_KEY_USR}" -var="secret_key=${env.AWS_ACCESS_KEY_PSW}"'
+                sh 'terraform plan -var=\"access_key=${env.AWS_ACCESS_KEY_USR}\" -var=\"secret_key=${env.AWS_ACCESS_KEY_PSW}\"'
             }
         }
     }
