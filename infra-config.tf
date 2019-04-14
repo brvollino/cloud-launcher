@@ -46,6 +46,18 @@ resource "aws_security_group" "access-log-analysis-service" {
   }
 }
 
+resource "aws_elasticsearch_domain" "default-es" {
+  domain_name           = "default-es"
+  elasticsearch_version = "6.5"
+  cluster_config {
+    instance_type = "t2.small.elasticsearch"
+    instance_count = 1
+  }
+  tags = {
+    Domain = "default-es"
+  }
+}
+
 data "aws_ami" "access_log_analysis_service_ami" {
   most_recent = true
   filter {
@@ -54,6 +66,18 @@ data "aws_ami" "access_log_analysis_service_ami" {
   }
   owners = ["self"]
 }
+
+data "template_file" "access-log-analysis-service-init-script" {
+  vars {
+    elasticsearch_endpoint = "${aws_elasticsearch_domain.default-es.endpoint}"
+  }
+  template = <<-EOT
+    #!/bin/bash
+    ACCESS_LOG_ANALYSIS_CMD="access-log-analysis-service 8090 $${elasticsearch_endpoint}"
+    crontab -l | { cat; echo \"@reboot $${ACCESS_LOG_ANALYSIS_CMD}\"; } | crontab -
+  EOT
+}
+
 resource "aws_instance" "access-log-analysis-service" {
   count = 1
   ami = "${data.aws_ami.access_log_analysis_service_ami.id}"
@@ -64,4 +88,5 @@ resource "aws_instance" "access-log-analysis-service" {
   tags {
     Name = "access-log-analysis-service"
   }
+  user_data = "${data.template_file.access-log-analysis-service-init-script.rendered}"
 }
