@@ -15,14 +15,29 @@ resource "aws_default_vpc" "default" {
 resource "aws_security_group" "ssh" {
   name   = "ssh"
   vpc_id = "${aws_default_vpc.default.id}"
-
   ingress {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
     cidr_blocks = ["0.0.0.0/0"]
   }
+  egress {
+    protocol    = -1
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
+resource "aws_security_group" "access-log-analysis-service" {
+  name   = "access-log-analysis-service"
+  vpc_id = "${aws_default_vpc.default.id}"
+  ingress {
+    protocol    = "tcp"
+    from_port   = 8090
+    to_port     = 8090
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     protocol    = -1
     from_port   = 0
@@ -45,7 +60,7 @@ resource "aws_instance" "access-log-analysis-service" {
   instance_type = "t2.micro"
   key_name = "vollino_aws"
   associate_public_ip_address = true
-  security_groups = ["ssh"]
+  security_groups = ["ssh", "access-log-analysis-service"]
   tags {
     Name = "access-log-analysis-service"
   }
