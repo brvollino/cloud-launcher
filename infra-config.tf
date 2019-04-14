@@ -6,6 +6,9 @@ provider "aws" {
   secret_key = "${var.secret_key}",
   region = "sa-east-1"
 }
+
+data "aws_region" "current" {}
+
 resource "aws_default_vpc" "default" {
   tags = {
     Name = "Default VPC"
@@ -52,6 +55,10 @@ resource "aws_elasticsearch_domain" "default-es" {
   cluster_config {
     instance_type = "t2.small.elasticsearch"
     instance_count = 1
+  }
+  ebs_options {
+    ebs_enabled = true
+    volume_size = 1
   }
   tags = {
     Domain = "default-es"
