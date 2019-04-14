@@ -62,7 +62,7 @@ data "aws_ami" "access_log_analysis_service_ami" {
   most_recent = true
   filter {
     name   = "name"
-    values = ["access-log-analysis-service-*"]
+    values = ["access-log-analysis-service*"]
   }
   owners = ["self"]
 }
