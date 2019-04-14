@@ -74,17 +74,6 @@ data "aws_ami" "access_log_analysis_service_ami" {
   owners = ["self"]
 }
 
-data "template_file" "access-log-analysis-service-init-script" {
-  vars {
-    elasticsearch_endpoint = "${aws_elasticsearch_domain.default-es.endpoint}"
-  }
-  template = <<-EOT
-    #!/bin/bash
-    ACCESS_LOG_ANALYSIS_CMD="access-log-analysis-service 8090 $${elasticsearch_endpoint}"
-    crontab -l | { cat; echo \"@reboot $ACCESS_LOG_ANALYSIS_CMD\"; } | crontab -
-  EOT
-}
-
 resource "aws_instance" "access-log-analysis-service" {
   count = 1
   ami = "${data.aws_ami.access_log_analysis_service_ami.id}"
@@ -95,5 +84,10 @@ resource "aws_instance" "access-log-analysis-service" {
   tags {
     Name = "access-log-analysis-service"
   }
-  user_data = "${data.template_file.access-log-analysis-service-init-script.rendered}"
+  user_data = <<-EOF
+#! /bin/bash
+ACCESS_LOG_ANALYSIS_CMD="/home/ubuntu/access-log-analysis-service*/bin/access-log-analysis-service 8090 ${aws_elasticsearch_domain.default-es.endpoint}"
+crontab -u ubuntu -l | { cat; echo "@reboot $ACCESS_LOG_ANALYSIS_CMD"; } | crontab -u ubuntu -
+sh $ACCESS_LOG_ANALYSIS_CMD &
+  EOF
 }
