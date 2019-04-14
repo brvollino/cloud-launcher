@@ -58,7 +58,7 @@ resource "aws_elasticsearch_domain" "default-es" {
   }
   ebs_options {
     ebs_enabled = true
-    volume_size = 1
+    volume_size = 10
   }
   tags = {
     Domain = "default-es"
