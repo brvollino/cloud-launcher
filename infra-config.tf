@@ -81,7 +81,7 @@ data "template_file" "access-log-analysis-service-init-script" {
   template = <<-EOT
     #!/bin/bash
     ACCESS_LOG_ANALYSIS_CMD="access-log-analysis-service 8090 $${elasticsearch_endpoint}"
-    crontab -l | { cat; echo \"@reboot $${ACCESS_LOG_ANALYSIS_CMD}\"; } | crontab -
+    crontab -l | { cat; echo \"@reboot $ACCESS_LOG_ANALYSIS_CMD\"; } | crontab -
   EOT
 }
 
