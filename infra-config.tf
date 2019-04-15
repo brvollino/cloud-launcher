@@ -101,7 +101,10 @@ resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
     "Statement": [
         {
             "Action": "es:*",
-            "Principal": "*",
+            "Principal": {
+              "Service": "ec2.amazonaws.com",
+              "Service": "es.amazonaws.com"
+            },
             "Effect": "Allow",
             "Resource": "${aws_elasticsearch_domain.default-es.arn}/*",
             "Condition": {
