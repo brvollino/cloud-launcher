@@ -104,14 +104,15 @@ resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": [
-          "${data.aws_caller_identity.currentUser.account_id}"
-        ]
+        "AWS": "*"
       },
-      "Action": [
-        "es:*"
-      ],
-      "Resource": "arn:aws:es:${data.aws_region.currentRegion.name}:${data.aws_caller_identity.currentUser.account_id}:domain/${aws_elasticsearch_domain.default-es.domain_name}/*"
+      "Action": "es:*",
+      "Resource": "arn:aws:es:${data.aws_region.currentRegion.name}:${data.aws_caller_identity.currentUser.account_id}:domain/${aws_elasticsearch_domain.default-es.domain_name}/*",
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "${aws_instance.access-log-analysis-service.public_ip}"
+        }
+      }
     }
   ]
 }
