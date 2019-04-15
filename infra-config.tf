@@ -15,8 +15,8 @@ resource "aws_default_vpc" "default" {
   }
 }
 
-resource "aws_security_group" "ssh" {
-  name   = "ssh"
+resource "aws_security_group" "ssh-sg" {
+  name   = "ssh-sg"
   vpc_id = "${aws_default_vpc.default.id}"
   ingress {
     protocol    = "tcp"
@@ -32,8 +32,8 @@ resource "aws_security_group" "ssh" {
   }
 }
 
-resource "aws_security_group" "access-log-analysis-service" {
-  name   = "access-log-analysis-service"
+resource "aws_security_group" "access-log-analysis-service-sg" {
+  name   = "access-log-analysis-service-sg"
   vpc_id = "${aws_default_vpc.default.id}"
   ingress {
     protocol    = "tcp"
@@ -80,7 +80,7 @@ resource "aws_instance" "access-log-analysis-service" {
   instance_type = "t2.micro"
   key_name = "vollino_aws"
   associate_public_ip_address = true
-  security_groups = ["ssh", "access-log-analysis-service"]
+  security_groups = ["ssh-sg", "access-log-analysis-service-sg"]
   tags {
     Name = "access-log-analysis-service"
   }
@@ -90,4 +90,27 @@ ACCESS_LOG_ANALYSIS_CMD="/home/ubuntu/access-log-analysis-service*/bin/access-lo
 crontab -u ubuntu -l | { cat; echo "@reboot $ACCESS_LOG_ANALYSIS_CMD"; } | crontab -u ubuntu -
 sh $ACCESS_LOG_ANALYSIS_CMD &
   EOF
+}
+
+resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
+  domain_name = "${aws_elasticsearch_domain.default-es.domain_name}"
+
+  access_policies = <<POLICIES
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "es:*",
+            "Principal": "*",
+            "Effect": "Allow",
+            "Resource": "*",
+            "Condition": {
+                "IpAddress": {
+                  "aws:SourceIp": "${aws_instance.access-log-analysis-service.public_ip}"
+                }
+            },
+        }
+    ]
+}
+POLICIES
 }
