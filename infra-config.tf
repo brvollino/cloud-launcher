@@ -103,7 +103,7 @@ resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
             "Action": "es:*",
             "Principal": "*",
             "Effect": "Allow",
-            "Resource": "*",
+            "Resource": "${aws_elasticsearch_domain.default-es.arn}/*",
             "Condition": {
                 "IpAddress": {
                   "aws:SourceIp": [
