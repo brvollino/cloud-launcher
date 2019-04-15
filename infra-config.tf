@@ -82,6 +82,7 @@ resource "aws_instance" "access-log-analysis-service" {
   key_name = "vollino_aws"
   associate_public_ip_address = true
   security_groups = ["ssh-sg", "access-log-analysis-service-sg"]
+  iam_instance_profile = "EC2_can_use_services"
   tags {
     Name = "access-log-analysis-service"
   }
