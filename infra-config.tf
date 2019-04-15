@@ -7,7 +7,8 @@ provider "aws" {
   region = "sa-east-1"
 }
 
-data "aws_region" "current" {}
+data "aws_region" "currentRegion" {}
+data "aws_caller_identity" "currentUser" {}
 
 resource "aws_default_vpc" "default" {
   tags = {
@@ -97,25 +98,21 @@ resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
 
   access_policies = <<POLICIES
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": "es:*",
-            "Principal": {
-              "Service": "ec2.amazonaws.com",
-              "Service": "es.amazonaws.com"
-            },
-            "Effect": "Allow",
-            "Resource": "${aws_elasticsearch_domain.default-es.arn}/*",
-            "Condition": {
-                "IpAddress": {
-                  "aws:SourceIp": [
-                    "${aws_instance.access-log-analysis-service.public_ip}"
-                  ]
-                }
-            },
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "${data.aws_caller_identity.currentUser.account_id}"
+        ]
+      },
+      "Action": [
+        "es:*"
+      ],
+      "Resource": "arn:aws:es:${data.aws_region.currentRegion.name}:${data.aws_caller_identity.currentUser.account_id}:domain/${aws_elasticsearch_domain.default-es.domain_name}/*"
+    }
+  ]
 }
 POLICIES
 }
