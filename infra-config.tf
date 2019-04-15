@@ -106,7 +106,9 @@ resource "aws_elasticsearch_domain_policy" "elasticsearch-policy" {
             "Resource": "*",
             "Condition": {
                 "IpAddress": {
-                  "aws:SourceIp": "${aws_instance.access-log-analysis-service.public_ip}"
+                  "aws:SourceIp": [
+                    "${aws_instance.access-log-analysis-service.public_ip}"
+                  ]
                 }
             },
         }
